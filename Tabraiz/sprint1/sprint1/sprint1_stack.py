@@ -27,8 +27,8 @@ class Sprint1Stack(Stack):
 
         #defining an event
         #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_events/README.html
-        schedule = events_.Schedule.cron(minute="1")
-        target = target.LambdaFunction(handler= hw_lambda)
+        schedule = events_.Schedule.cron(minute="0/1")
+        target = target_.LambdaFunction(handler= hw_lambda)
         rule = events_.Rule(self, "LambdaRuleEvent",
             description = 'this my rule to generate auto events for my hw_lamda', 
             schedule= schedule,           
@@ -42,9 +42,9 @@ class Sprint1Stack(Stack):
 
 
     #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda/Function.html    
-    def create_lambda(self,id_,handler, path ):
-        return lambda_.Function(self, id_,
-    runtime=lambda_.Runtime.PYTHON_3_7,
-    handler=handler,
-    code=lambda_.Code.from_asset(path)
+    def create_lambda(self,id_,handler, path):
+                return lambda_.Function(self, id_,
+                                runtime=lambda_.Runtime.PYTHON_3_7,
+                                handler=handler,
+                                code=lambda_.Code.from_asset(path)
 )

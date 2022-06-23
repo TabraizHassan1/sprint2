@@ -17,7 +17,9 @@ def lambda_handler(event, context):
     latency= getLatency()
     values.update({"availability": availability, "Latency": latency})
 
-    return values
+    print(values)
+
+
 
 
 #describe the parameters that your function takes

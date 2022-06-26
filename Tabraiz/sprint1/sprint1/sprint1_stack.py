@@ -30,7 +30,7 @@ class Sprint1Stack(Stack):
 
         lambda_role = self.create_lambda_role()
       
-        hw_lambda = self.create_lambda("MyFirstLambda", "hw_lambda.lambda_handler","./resources")
+        hw_lambda = self.create_lambda("MyFirstLambda", "hw_lambda.lambda_handler","./resources", lambda_role)
         hw_lambda.apply_removal_policy(RemovalPolicy.DESTROY)
         # The code that defines your stack goes here
 
@@ -65,58 +65,68 @@ class Sprint1Stack(Stack):
         #     visibility_timeout=Duration.seconds(300),
         # )
 
+        for i in constants.URL_TO_MONITOR:
+            dimensions = {"URL": i}
+            #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Metric.html
+            #define threshold and create alarms
+            availMetric = cloudwatch_.Metric(metric_name= constants.URL_MONITOR_METRIC_NAME_AVAILABILITY,
+            namespace= constants.URL_MONITOR_NAMESPACE,
+            dimensions_map=dimensions,
+            period=Duration.minutes(1))
 
-        dimensions = {"URL": constants.URL_TO_MONITOR}
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Metric.html
-        #define threshold and create alarms
-        availMetric = cloudwatch_.Metric(metric_name= constants.URL_MONITOR_METRIC_NAME_AVAILABILITY,
-        namespace= constants.URL_MONITOR_NAMESPACE,
-        dimensions_map=dimensions,
-        period=Duration.minutes(1))
+
+            #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Alarm.html
+            availAlarm = cloudwatch_.Alarm(self, "Availability Alarm For "+ i,
+            comparison_operator=cloudwatch_.ComparisonOperator.LESS_THAN_THRESHOLD,
+            threshold=0,
+            evaluation_periods=1,
+            metric=availMetric,
+            
+                )
+
+            
+            
 
 
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Alarm.html
-        availAlarm = cloudwatch_.Alarm(self, "AvailabilityAlarm",
-        comparison_operator=cloudwatch_.ComparisonOperator.LESS_THAN_THRESHOLD,
-        threshold=0,
-        evaluation_periods=1,
-        metric=availMetric,
         
+
+            #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Metric.html
+            #define threshold and create alarms
+            latenMetric = cloudwatch_.Metric(metric_name= constants.URL_MONITOR_METRIC_NAME_LATENCY,
+            namespace= constants.URL_MONITOR_NAMESPACE,
+            dimensions_map=dimensions,
+            period=Duration.minutes(1))
+
+
+            #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Alarm.html
+            latenAlarm = cloudwatch_.Alarm(self, "Latency Alarm For "+ i,
+            threshold=0.2,
+            evaluation_periods=1,
+            metric=latenMetric,
+        
+
             )
 
-        availAlarm.apply_removal_policy(RemovalPolicy.DESTROY)
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch_actions/SnsAction.html
-        availAlarm.add_alarm_action(cw_actions.SnsAction(topic))
+            #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch_actions/SnsAction.html
+            availAlarm.add_alarm_action(cw_actions.SnsAction(topic))
+            latenAlarm.add_alarm_action(cw_actions.SnsAction(topic))
 
 
-      
-
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Metric.html
-        #define threshold and create alarms
-        latenMetric = cloudwatch_.Metric(metric_name= constants.URL_MONITOR_METRIC_NAME_LATENCY,
-        namespace= constants.URL_MONITOR_NAMESPACE,
-        dimensions_map=dimensions,
-        period=Duration.minutes(1))
+            availAlarm.apply_removal_policy(RemovalPolicy.DESTROY)
+            latenAlarm.apply_removal_policy(RemovalPolicy.DESTROY)
+            
 
 
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Alarm.html
-        latenAlarm = cloudwatch_.Alarm(self, "LatencyAlarm",
-        threshold=0.2,
-        evaluation_periods=1,
-        metric=latenMetric,
-       
-
-        )
-
-        latenAlarm.apply_removal_policy(RemovalPolicy.DESTROY)
 
     #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda/Function.html    
-    def create_lambda(self,id_,handler, path):
+    def create_lambda(self,id_,handler, path, role):
                 return lambda_.Function(self, id_,
                                 runtime=lambda_.Runtime.PYTHON_3_7,
                                 handler=handler,
-                                code=lambda_.Code.from_asset(path)
-)
+                                code=lambda_.Code.from_asset(path),
+                                role= role,
+                                timeout= Duration.seconds(120)
+                                        )
 
     def create_lambda_role(self):
         #Create a role
@@ -124,6 +134,6 @@ class Sprint1Stack(Stack):
                     assumed_by = aws_iam.ServicePrincipal('lambda.amazonaws.com'),
                     managed_policies = [
                        # aws_iam.iam.ManagedPolicy.from_managed_policy_name( 'service-role/AWSLambdaBasicExecutionRole')    ---This is default given
-                        aws_iam.ManagedPolicy.from_aws_managed_policy_name('CloudWatchFullAccess')
+                        aws_iam.ManagedPolicy.from_aws_managed_policy_name("CloudWatchFullAccess")
                     ])
         return lambdaRole

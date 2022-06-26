@@ -1,12 +1,15 @@
  
 from datetime import datetime
+
 import http
 import urllib3
 from urllib import response
 
+from cloudWatch_putMetric import cloudWatch_putMetric
+
+import constants as constants
 
 
-URL_TO_MONITOR = 'skipq.org'
 
 
 def lambda_handler(event, context):
@@ -15,6 +18,38 @@ def lambda_handler(event, context):
     values= dict()
     availability = getAvailability()
     latency= getLatency()
+    cw= cloudWatch_putMetric()
+
+    dimension = [ { 'Name': 'URL', 'Value': constants.URL_TO_MONITOR}]
+
+
+    responseAvail = cw.put_data(constants.URL_MONITOR_NAMESPACE,
+    constants.URL_MONITOR_METRIC_NAME_AVAILABILITY,
+    dimension,
+    availability
+    )
+    responseLat = cw.put_data(constants.URL_MONITOR_NAMESPACE,
+    constants.URL_MONITOR_METRIC_NAME_LATENCY,
+    dimension,
+    latency
+    )
+  
+
+
+   
+
+    #create alarms and define threshold
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    #i would like to publish my matrices to cloudwatch
     values.update({"availability": availability, "Latency": latency})
 
     print(values)
@@ -26,7 +61,7 @@ def lambda_handler(event, context):
 #mention the return value
 def getAvailability():
     http = urllib3.PoolManager()
-    response = http.request("GET", URL_TO_MONITOR)
+    response = http.request("GET", constants.URL_TO_MONITOR)
     if response.status == 200:
         return 1.0
     else:
@@ -41,7 +76,7 @@ def getAvailability():
 def getLatency():
      http = urllib3.PoolManager()
      start = datetime.now()
-     response = http.request("GET", URL_TO_MONITOR)
+     response = http.request("GET", constants.URL_TO_MONITOR)
      end = datetime.now()
      delta = end - start                        #take time difference
      latencySec = round(delta.microseconds * 0.000001,6)

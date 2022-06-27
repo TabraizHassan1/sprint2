@@ -12,7 +12,8 @@ from aws_cdk import (
     aws_cloudwatch as cloudwatch_,
     aws_sns as sns_,
     aws_cloudwatch_actions as cw_actions,
-    aws_sns_subscriptions as subscriptions_
+    aws_sns_subscriptions as subscriptions_,
+    aws_dynamodb as db_
 
     
 )
@@ -31,7 +32,25 @@ class Sprint1Stack(Stack):
         lambda_role = self.create_lambda_role()
       
         hw_lambda = self.create_lambda("MyFirstLambda", "hw_lambda.lambda_handler","./resources", lambda_role)
+        db_lambda = self.create_lambda("TabDynamoDBLambdaFunction", "DynamoDBLambda.lambda_handler","./resources", lambda_role)
         hw_lambda.apply_removal_policy(RemovalPolicy.DESTROY)
+        db_lambda.apply_removal_policy(RemovalPolicy.DESTROY)
+
+
+
+        #create a dynamo DB table
+        DBTable = self.create_table()
+
+        #get table name
+        dbName = DBTable.table_name
+
+        #creating a db lambda environment variable
+        #https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-samples
+        db_lambda.add_environment("DBTable", dbName)
+
+
+
+
         # The code that defines your stack goes here
 
         #defining an event
@@ -54,6 +73,8 @@ class Sprint1Stack(Stack):
 
         #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_sns_subscriptions/EmailSubscription.html
         topic.add_subscription(subscriptions_.EmailSubscription('tabraiz.hassan.skipq@gmail.com'))
+        topic.add_subscription(subscriptions_.LambdaSubscription(db_lambda))
+        
 
 
 
@@ -134,6 +155,17 @@ class Sprint1Stack(Stack):
                     assumed_by = aws_iam.ServicePrincipal('lambda.amazonaws.com'),
                     managed_policies = [
                        # aws_iam.iam.ManagedPolicy.from_managed_policy_name( 'service-role/AWSLambdaBasicExecutionRole')    ---This is default given
-                        aws_iam.ManagedPolicy.from_aws_managed_policy_name("CloudWatchFullAccess")
+                        aws_iam.ManagedPolicy.from_aws_managed_policy_name("CloudWatchFullAccess"),
+                        aws_iam.ManagedPolicy.from_aws_managed_policy_name("AmazonDynamoDBFullAccess")
                     ])
         return lambdaRole
+    
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Table.html
+    def create_table(self):
+        return db_.Table(self, 
+        id="AlarmInfoTable",
+        removal_policy= RemovalPolicy.DESTROY,
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Attribute.html#aws_cdk.aws_dynamodb.Attribute
+        partition_key= db_.Attribute(name="Alarm_Name", type=db_.AttributeType.STRING),
+        sort_key= db_.Attribute(name= "Alarm_Time", type=db_.AttributeType.STRING)
+        )

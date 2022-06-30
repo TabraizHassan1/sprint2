@@ -161,11 +161,11 @@ class Sprint1Stack(Stack):
         return lambdaRole
     
     #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Table.html
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Attribute.html#aws_cdk.aws_dynamodb.Attribute
     def create_table(self):
-        return db_.Table(self, 
-        id="AlarmInfoTable",
-        removal_policy= RemovalPolicy.DESTROY,
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Attribute.html#aws_cdk.aws_dynamodb.Attribute
-        partition_key= db_.Attribute(name="Alarm_Name", type=db_.AttributeType.STRING),
-        sort_key= db_.Attribute(name= "Alarm_Time", type=db_.AttributeType.STRING)
+        return db_.Table(
+            self, id = "AlarmInfoTable",
+            partition_key = db_.Attribute(name="Alarm_Name", type=db_.AttributeType.STRING),
+            sort_key = db_.Attribute(name= "Alarm_Time", type=db_.AttributeType.STRING),
+            removal_policy= RemovalPolicy.DESTROY,
         )

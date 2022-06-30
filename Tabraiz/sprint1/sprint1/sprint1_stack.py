@@ -99,7 +99,7 @@ class Sprint1Stack(Stack):
             #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Alarm.html
             availAlarm = cloudwatch_.Alarm(self, "Availability Alarm For "+ i,
             comparison_operator=cloudwatch_.ComparisonOperator.LESS_THAN_THRESHOLD,
-            threshold=0,
+            threshold=1,
             evaluation_periods=1,
             metric=availMetric,
             

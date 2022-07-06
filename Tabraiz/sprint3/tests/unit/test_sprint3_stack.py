@@ -34,3 +34,56 @@ def test_lambda_created(template):
 #     template.has_resource_properties("AWS::SQS::Queue", {
 #         "VisibilityTimeout": 300
 #     })
+
+
+def test_role_created(template):
+    
+    #check if roles are created or not
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.assertions/Template.html
+    template.has_resource_properties(
+        "AWS::IAM::Role",
+            {
+                "ManagedPolicyArns": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/CloudWatchFullAccess"
+                                ]
+                            ]
+                        },
+                {
+                    "Fn::Join": [
+                    "",
+                    [
+                        "arn:",
+                        {
+                        "Ref": "AWS::Partition"
+                        },
+                        ":iam::aws:policy/AmazonDynamoDBFullAccess"
+                        ]
+                    ]
+                }
+            ]
+        }
+    )
+
+def test_table_created(template):
+    #check if table is created 
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.assertions/Template.html
+    template.resource_count_is("AWS::DynamoDB::Table", 1)
+
+def test_lambda_sub(template):
+    #check if sns lambda subscription is created or not
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.assertions/Template.html
+    template.has_resource_properties("AWS::SNS::Subscription", {"Protocol": "lambda"})
+
+
+def test_email_sub(template):
+    #check if email subscription has been created by user 
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.assertions/Template.html
+    template.has_resource_properties("AWS::SNS::Subscription", {"Protocol": "email"})

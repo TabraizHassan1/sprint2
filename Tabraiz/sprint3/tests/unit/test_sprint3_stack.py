@@ -1,6 +1,6 @@
 import aws_cdk as core
 import aws_cdk.assertions as assertions
-import _pytest
+import pytest
 
 
 from sprint3.sprint3_stack import Sprint3Stack
@@ -18,8 +18,8 @@ from sprint3.sprint3_stack import Sprint3Stack
 
 #https://towardsdatascience.com/make-your-python-tests-efficient-with-pytest-fixtures-3d7a1892265f
 #Defining a pytest fixture for code optimization
-@_pytest.fixture
-def temp():
+@pytest.fixture
+def template():
     app = core.App()
     stack = Sprint3Stack(app, "sprint3")
     template = assertions.Template.from_stack(stack)
@@ -35,9 +35,7 @@ def test_lambda_created(template):
 #         "VisibilityTimeout": 300
 #     })
 
-
 def test_role_created(template):
-    
     #check if roles are created or not
     #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.assertions/Template.html
     template.has_resource_properties(

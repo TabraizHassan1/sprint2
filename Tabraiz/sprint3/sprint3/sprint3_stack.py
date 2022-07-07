@@ -13,7 +13,8 @@ from aws_cdk import (
     aws_sns as sns_,
     aws_cloudwatch_actions as cw_actions,
     aws_sns_subscriptions as subscriptions_,
-    aws_dynamodb as db_
+    aws_dynamodb as db_,
+    aws_codedeploy as codedeploy_
 
     
 )
@@ -35,6 +36,92 @@ class Sprint3Stack(Stack):
         db_lambda = self.create_lambda("TabDynamoDBLambdaFunction", "DynamoDBLambda.lambda_handler","./resources", lambda_role)
         hw_lambda.apply_removal_policy(RemovalPolicy.DESTROY)
         db_lambda.apply_removal_policy(RemovalPolicy.DESTROY)
+
+
+
+
+        #Creating my sns topic(i.e. message server)
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_sns/Topic.html
+        topic = sns_.Topic(self, "AlarmNotification")
+        topic.apply_removal_policy(RemovalPolicy.DESTROY)
+
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_sns_subscriptions/EmailSubscription.html
+        topic.add_subscription(subscriptions_.EmailSubscription('tabraiz.hassan.skipq@gmail.com'))
+        topic.add_subscription(subscriptions_.LambdaSubscription(db_lambda))
+
+
+
+        #Step 1: Get my metric
+        #(A):
+     #   hw_lambdaMetric = hw_lambda.metric('Duration')
+
+        #(B):
+        #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda/Function.html
+        hw_lambdaDurMetric = hw_lambda.metric_duration()
+
+        #(C):
+        #dimensions = {"FunctionName": hw_lambda.function_name}
+        #hw_lambdaMetric = cloudwatch_.Metric(metric_name= 'Duration',
+        #    namespace= 'AWS/Lambda',
+        #    dimensions_map=dimensions,
+        #    period=Duration.minutes(1))
+
+                
+
+        #Step 2: Create Alarm for my Lambda duration Metric
+
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Alarm.html
+        durationAlarm = cloudwatch_.Alarm(self, "hw_lambda_DurationAlarm ",
+        comparison_operator=cloudwatch_.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        threshold=8000,
+        evaluation_periods=1,
+        metric=hw_lambdaDurMetric )
+
+        #Removal policy for duration alarm
+        durationAlarm.apply_removal_policy(RemovalPolicy.DESTROY)
+
+
+
+
+
+        hw_lambdaInvocMetric = hw_lambda.metric_invocations()
+        #Step 2: Create Alarm for my Lambda invocation Metric
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Alarm.html
+        invocAlarm = cloudwatch_.Alarm(self, "hw_lambda_InvocationAlarm ",
+        comparison_operator=cloudwatch_.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        threshold=1,
+        evaluation_periods=1,
+        metric=hw_lambdaInvocMetric )
+
+        #Removal policy for invocation alarm
+        invocAlarm.apply_removal_policy(RemovalPolicy.DESTROY)
+
+        #Conneting Duration and Invocation Alarms to the SNS Topic
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch_actions/SnsAction.html
+        durationAlarm.add_alarm_action(cw_actions.SnsAction(topic))
+        invocAlarm.add_alarm_action(cw_actions.SnsAction(topic))
+
+
+
+        #Deployment Configuration for Lambda Deployment Group 
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_codedeploy/LambdaDeploymentConfig.html    
+        version = hw_lambda.current_version
+        alias = lambda_.Alias(self, "LambdaAlias",
+        alias_name="Prod",
+        version=version)     
+        #Lambda deployment configurations and rollback
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_codedeploy/LambdaDeploymentGroup.html 
+        #Lambda group specifies how to route traffic to a new  version of lambda, it might also specify how alarms will be geneerated and how to roll back
+        deployment_group = codedeploy_.LambdaDeploymentGroup(self, "HwLambdaDeployment",
+        alarms=[durationAlarm,invocAlarm],
+        alias=alias,                  #default auto rollback
+        deployment_config=codedeploy_.LambdaDeploymentConfig.LINEAR_10_PERCENT_EVERY_1_MINUTE) #after every one minute on 10 percent instances, the new version is deployed
+
+
+        
+
+
+
 
 
 
@@ -66,14 +153,7 @@ class Sprint3Stack(Stack):
         rule.apply_removal_policy(RemovalPolicy.DESTROY)
 
 
-        #Creating my sns topic(i.e. message server)
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_sns/Topic.html
-        topic = sns_.Topic(self, "AlarmNotification")
-        topic.apply_removal_policy(RemovalPolicy.DESTROY)
-
-        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_sns_subscriptions/EmailSubscription.html
-        topic.add_subscription(subscriptions_.EmailSubscription('tabraiz.hassan.skipq@gmail.com'))
-        topic.add_subscription(subscriptions_.LambdaSubscription(db_lambda))
+        
         
 
 

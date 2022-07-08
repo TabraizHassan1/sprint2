@@ -50,7 +50,7 @@ class MyPipelineStack(Stack):
         #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.pipelines/AddStageOpts.html
         beta = MyStage(self, "TABBetaStage")
         myPipeline.add_stage(beta, pre=[pipeline_.ShellStep("UnitTest",
-        commands= ['cd Tabraiz/sprint3/', 'pip install -r requirements.txt','npm install -g aws-cdk','cdk synth', 'pytest'],
+        commands= ['cd Tabraiz/sprint3/', 'pip install -r requirements.txt','pip install -r requirements-dev.txt','npm install -g aws-cdk','cdk synth', 'pytest'],
         primary_output_directory= "Tabraiz/sprint3/cdk.out")
                 ])
 

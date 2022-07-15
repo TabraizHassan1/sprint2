@@ -14,7 +14,8 @@ from aws_cdk import (
     aws_cloudwatch_actions as cw_actions,
     aws_sns_subscriptions as subscriptions_,
     aws_dynamodb as db_,
-    aws_codedeploy as codedeploy_
+    aws_codedeploy as codedeploy_,
+    aws_apigateway as apigateway_
 
     
 )
@@ -38,6 +39,31 @@ class Sprint4Stack(Stack):
         db_lambda.apply_removal_policy(RemovalPolicy.DESTROY)
 
 
+
+
+        #lambda creation and destruction
+        rq_lambda = self.create_lambda("TABRequestLambda", "request_lambda.lambda_handler","./resources", lambda_role)
+        rq_lambda.apply_removal_policy(RemovalPolicy.DESTROY)
+
+
+        #create gateway
+        api_connect = self.create_api("request_lambda.lambda_handler")
+        #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_apigateway/LambdaRestApi.html
+        item = api_connect.root.add_resource("item")
+        item.add_method("GET") # GET /item
+        item.add_method("POST") # POST /item
+        item.add_method("PATCH") # PATCH /item
+        item.add_method("DELETE") # DELETE /item
+
+        items = api_connect.root.add_resource("items")
+        items.add_method("GET") # GET /items
+
+
+
+
+
+
+        api_connect.apply_removal_policy(RemovalPolicy.DESTROY)
 
 
         #Creating my sns topic(i.e. message server)
@@ -127,14 +153,19 @@ class Sprint4Stack(Stack):
 
         #create a dynamo DB table
         DBTable = self.create_table()
+        #2nd table
+        DBTable2 = self.create_table2()
 
         #get table name
         dbName = DBTable.table_name
+        #get 2nd table name
+        dbName2 = DBTable2.table_name
 
         #creating a db lambda environment variable
         #https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-samples
         db_lambda.add_environment("DBTable", dbName)
-
+        #2nd table environment variable
+        rq_lambda.add_environment("RqTable",dbName2)
 
 
 
@@ -249,3 +280,16 @@ class Sprint4Stack(Stack):
             sort_key = db_.Attribute(name= "Alarm_Time", type=db_.AttributeType.STRING),
             removal_policy= RemovalPolicy.DESTROY,
         )
+
+    #2nd table to store url data
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Table.html
+    #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Attribute.html#aws_cdk.aws_dynamodb.Attribute
+    def create_table2(self):
+        return db_.Table(
+            self, id = "URLInfoTable",
+            partition_key = db_.Attribute(name="URL_id", type=db_.AttributeType.STRING),
+            removal_policy= RemovalPolicy.DESTROY,
+        )    
+    
+    def create_api(self, handler):
+        return apigateway_.LambdaRestApi(self, "URLApi", handler= handler, proxy=False, )

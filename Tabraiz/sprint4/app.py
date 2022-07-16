@@ -2,10 +2,10 @@
 
 import aws_cdk as cdk
 
-from sprint4.pipeline_stack import MyPipelineStack
+from sprint4.pipeline_stack import TabraizPipelineStack
 
 
 app = cdk.App()
-MyPipelineStack(app, "tabraizPipelineStackSprint4")
+TabraizPipelineStack(app, "tabraizPipelineStackSprint4",)
 
 app.synth()

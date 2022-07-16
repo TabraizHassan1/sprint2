@@ -1,17 +1,22 @@
 from asyncio.log import logger
 from email import message
+import re
 #from msilib import Table
 from urllib import response
 import boto3
 import json
 import os
-import logging
+#import logging
 
 
 #https://hands-on.cloud/working-with-dynamodb-in-python-using-boto3/
-client = boto3.client('dynamodb')
+#client = boto3.client('dynamodb')
+
 
 db_resource = boto3.resource('dynamodb', region_name= 'us-east-1')    
+#https://www.infoq.com/news/2016/11/was-lambda-env-variables/
+#accessing lambda environment variable
+db_table_name=os.environ["RqTable"]
 table = db_resource.Table(db_table_name)
 
 
@@ -20,65 +25,152 @@ table = db_resource.Table(db_table_name)
 getMethod = 'GET'
 postMethod = 'POST'
 deleteMethod = 'DELETE'
-patchMethod = 'PATCH'
+putMethod = 'PUT'
 urlpath = '/item' 
-itemspath = '/items'
+#itemspath = '/items'
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+#logger = logging.getLogger()
+#logger.setLevel(logging.INFO)
 
-#https://www.infoq.com/news/2016/11/was-lambda-env-variables/
-#accessing lambda environment variable
-db_table_name=os.environ["RqTable"]
+
 #all alarm information is in the event
 def lambda_handler(event, context):
     #region = os.environ['AWS_REGION']
     
 
 
-    logger.info(event)
+    #logger.info(event)
 
     httpMethod = event['httpMethod']
     path = event['path']
 
     
     if(httpMethod== getMethod and path== urlpath):
-        response = getItem(event['queryStringParameters']['URL_id'])
-    elif(httpMethod== getMethod and path== itemspath):
-        response = getItems()
+        response = getItem()
+   # elif(httpMethod== getMethod and path== itemspath):
+   #     response = getItems()
     elif(httpMethod== postMethod and path== urlpath):
         response = saveItem(json.loads(event['body']))
-    elif(httpMethod== patchMethod and path== urlpath):
+        
+    elif(httpMethod== putMethod and path== urlpath):
         reqstBody = json.loads(event['body'])
-        response = modifyItem(reqstBody['URL_id'], reqstBody['updateKey'], reqstBody['updateValue'])
+        response = modifyItem(reqstBody['URL_id'], reqstBody['URL_name'])
+
     elif(httpMethod== deleteMethod and path== urlpath):
         reqstBody = json.loads(event['body'])
         response = deleteItem(reqstBody['URL_id'])
+
     else:
-        repsonse = buildResponse(404, 'Not Found')
+        return{
+        'statusCode': 404,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'},
+        'body': json.dumps('Not found')
+        }
 
     return response
 
 
 
-def getItem(urlid):
-    try:
-        response = table.get_item(
 
-            Key = {
-                'URL_id': urlid
-            }
-        )
-        if 'item' in response:
-            return buildResponse(200, response['item'])
-        else:
-            return buildResponse(404, {'Message': 'URL_id : %s not found' % urlid})
-    except:
-        logger.exception("Error!")
+#GET/Read url from database
+def getItem():
+    result = table.scan()
+    response = result['items']
+    if response:
+        return buildResponse(response)
+    else:
+        return buildResponse({"Message":"No URL found!!!"})
+ #  except:
+  #      logger.exception("Error!")
 
 
 
+#Save url in database
+def saveItem(rqstbody):
+    url_id= rqstbody['URL_id']
+    url_name = rqstbody['URL_name']
+    Key ={
+        'URL_id' : url_id,
+        'URL_name': url_name
 
+
+    }
+    response=table.put_item(item = Key)
+    if response:
+        return buildResponse({"Message":"URL Added successfully!!!"})
+    else:
+        return buildResponse({"Message":"URL cannot be added error!!!"})
+    
+
+
+#update url by id 
+def modifyItem(url_id, url_name):
+    Key = {
+        'URL_id' : url_id
+    }
+    response = table.update_item(
+    item= Key,
+    UpdateExpression = 'SET url_name = :URL_name',
+    ExpressionAttributeValues={'URL_name': url_name } 
+    )
+    if response:
+        return buildResponse({"Message":"URL Updated successfully!!!"})
+    else:
+        return buildResponse({"Message":"URL cannot be updated error!!!"})
+
+
+
+#delete url by id
+def deleteItem(url_id):
+    Key = {
+    'URL_id' : url_id
+    }
+    response = table.update_item(
+    item= Key)
+    if response:
+        return buildResponse({"Message":"URL Deleted successfully!!!"})
+    else:
+        return buildResponse({"Message":"URL cannot be deleted error!!!"})
+
+
+
+
+
+#return response function
+def buildResponse(response_data):
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+
+        },
+        'body': json.dumps(response_data)
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+""""
 def getItems():
     try:
         response = table.scan()
@@ -94,34 +186,9 @@ def getItems():
     except:
         logger.exception("Error!")
 
+"""
 
 
-def saveItem(rqstbody):
-    try:
-        table.put_item(item = rqstbody)
-        
-        
-
-    
-
-
-
-
-
-
-def buildResponse(statusCode, body= None):
-    response={
-        'statusCode': statusCode,
-        'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-
-        }
-
-    }
-    if body is not None:
-        response['body'] = json.dumps(body)
-    return response
 
 
 

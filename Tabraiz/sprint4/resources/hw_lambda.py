@@ -8,18 +8,29 @@ from urllib import response
 from cloudWatch_putMetric import cloudWatch_putMetric
 
 import constants as constants
-
+import getData as getData
+import boto3
+import json
+import os
 
 
 
 def lambda_handler(event, context):
-    print("hello world")
+    #print("hello world")
     # i want to contain my latency and availablity metrics for my webresource
     values= dict()
     #i would like to publish my matrices to cloudwatch
     cw= cloudWatch_putMetric()
+
+    db_table_name=os.environ["RqTable"]
+
+    #get url list from constants
+    Url_list = getData.get_url_list(db_table_name)
     
-    for i in constants.URL_TO_MONITOR:
+
+
+    
+    for i in Url_list:
         availability = getAvailability(i)
         latency= getLatency(i)
         

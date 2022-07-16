@@ -1,7 +1,8 @@
 
 # Website Monitoring project - sprint 2 by tabraiz hassan!
 
-[![Generic badge](https://img.shields.io/badge/OS-Mac%20OS-yellow)](#)   [![PyPI pyversions](https://img.shields.io/pypi/pyversions/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)   [![Lambda](https://img.shields.io/badge/AWS-lambda-brightgreen)](#)  [![Cloudwatch](https://img.shields.io/badge/AWS-cloudwatch-yellowgreen)](#)  [![Sns](https://img.shields.io/badge/AWS-sns-orange)](#) [![Dynamo](https://img.shields.io/badge/AWS-DynamoDB-blue)](#)   [![Virtual](https://img.shields.io/badge/-virtual%20env-green)](#)  [![made-for-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](#)      [![GitHub release](https://img.shields.io/github/release/Naereen/StrapDown.js.svg)](https://GitHub.com/Naereen/StrapDown.js/releases/) [![Github all releases](https://img.shields.io/github/downloads/Naereen/StrapDown.js/total.svg)](https://GitHub.com/Naereen/StrapDown.js/releases/)  [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/TabraizHassan1) [![Demo](https://img.shields.io/badge/-demo-red)](#) [![Bash Shell](https://badges.frapsoft.com/bash/v1/bash.png?v=103)](https://github.com/ellerbrock/open-source-badges/)  [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
+
+[![Generic badge](https://img.shields.io/badge/OS-Mac%20OS-yellow)](#)   [![PyPI pyversions](https://img.shields.io/pypi/pyversions/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)   [![Lambda](https://img.shields.io/badge/AWS-lambda-brightgreen)](https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda.html)  [![Cloudwatch](https://img.shields.io/badge/AWS-cloudwatch-yellowgreen)](https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_cloudwatch.html)  [![Sns](https://img.shields.io/badge/AWS-sns-orange)](https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_sns.html) [![Dynamo](https://img.shields.io/badge/AWS-DynamoDB-blue)](https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Table.html)   [![Virtual](https://img.shields.io/badge/-virtual%20env-green)](#)  [![made-for-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](#)      [![GitHub release](https://img.shields.io/github/release/Naereen/StrapDown.js.svg)](https://github.com/TabraizHassan1/sprint2/releases) [![Github all releases](https://img.shields.io/github/downloads/Naereen/StrapDown.js/total.svg)](https://github.com/TabraizHassan1/sprint2/releases)  [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/TabraizHassan1) [![Demo](https://img.shields.io/badge/-demo-red)](https://www.loom.com/share/9040ace965e14746914035639bf11b95) [![Bash Shell](https://badges.frapsoft.com/bash/v1/bash.png?v=103)](https://github.com/ellerbrock/open-source-badges/)  [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
 
 The objective of this sprint is to monitor latency and availability of website using serverless compute service (Lambda) and publish the data in the metrices of Cloudwatch. The alarms are also deployed to help notify the user (using Sns service) via email in case the latency or availability value of the URL is below the threshold value. In addition to alarm notification to the user, the notification data is also stored in NoSQL database i.e. DynamoDB
 
@@ -85,6 +86,9 @@ Firstly, latency(the amount of delay on a network) and availibilty(whether the w
 
 Alarms and Sns notification service is defined in our `sprint1_stack.py` file, as they are part of our infrastructure. Alarms are generated in case, the cloudwatch metrice value of availibility is less than 1 or the latency value is greater than 0.2. As soon as alarms are generated, they are notified to the user using Sns service to its subscribers via email. The alarm data (i.e. alarm name, alarm time and the complete message) is stored to cloud DynamoDB database defined in the `DynamoDBLambda.py`
 
+## Demo
+
+To watch demo: [![Demo](https://img.shields.io/badge/-demo-red)](https://www.loom.com/share/9040ace965e14746914035639bf11b95)
 
 
 ## Useful commands
@@ -96,7 +100,7 @@ Alarms and Sns notification service is defined in our `sprint1_stack.py` file, a
  * `cdk diff`        compare deployed stack with current state
  * `cdk docs`        open CDK documentation
 
-API Reference
+## API Reference
 
 A list of all the references to the resources used to build this project:
 

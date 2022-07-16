@@ -6,7 +6,7 @@ import json
 import os
 
 #https://hands-on.cloud/working-with-dynamodb-in-python-using-boto3/
-client = boto3.client('dynamodb')
+#client = boto3.client('dynamodb')
 
 
 #https://www.infoq.com/news/2016/11/was-lambda-env-variables/

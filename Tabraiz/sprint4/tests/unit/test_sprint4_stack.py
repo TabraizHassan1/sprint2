@@ -3,7 +3,7 @@ import aws_cdk.assertions as assertions
 import pytest
 
 
-from sprint4.sprint4_stack import Sprint4Stack
+from sprint4.sprint4_stack import TabraizSprint4Stack
 
 # example tests. To run these tests, uncomment this file along with the example
 # resource in sprint3/sprint3_stack.py
@@ -21,7 +21,7 @@ from sprint4.sprint4_stack import Sprint4Stack
 @pytest.fixture
 def template():
     app = core.App()
-    stack = Sprint4Stack(app, "sprint4")
+    stack = TabraizSprint4Stack(app, "sprint4")
     template = assertions.Template.from_stack(stack)
     return template
 
@@ -29,7 +29,7 @@ def template():
 
 #Test for checking the lambda functions count 
 def test_lambda_created(template):
-    template.resource_count_is("AWS::Lambda::Function",2)
+    template.resource_count_is("AWS::Lambda::Function",3)
 
 #     template.has_resource_properties("AWS::SQS::Queue", {
 #         "VisibilityTimeout": 300
@@ -85,3 +85,36 @@ def test_email_sub(template):
     #check if email subscription has been created by user 
     #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.assertions/Template.html
     template.has_resource_properties("AWS::SNS::Subscription", {"Protocol": "email"})
+
+
+
+def test_to_json(test_app):
+    #Test that the CloudFormation template deserialized into an object.
+    #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.assertions/Template.html#aws_cdk.assertions.Template.to_json
+    test_app.to_json()
+
+
+#Test for checking the api gateway count 
+def test_countRestAPI(template):
+      template.resource_count_is("AWS::ApiGateway::RestApi",1)
+
+#Test for checking the api gateway resource property
+#https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.assertions/Template.html#aws_cdk.assertions.Template.has_resource_properties
+def test_resourceAPI(template):
+     template.has_resource_properties("AWS::ApiGateway::Resource", {"PathPart": "item"})
+
+#test for checking delete api method
+def test_DeleteAPImethod(template):
+     template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "DELETE"})
+
+#test for checking update api method
+def test_UpdateAPImethod(template):
+    template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "POST"})
+
+#test for checking put api method
+def test_PUTAPImethod(template):
+    template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "PUT"})
+
+#test for checking get api method
+def test_UpdateAPImethod(template):
+    template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "GET"})

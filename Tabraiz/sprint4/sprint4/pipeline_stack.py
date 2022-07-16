@@ -11,12 +11,12 @@ from aws_cdk import (
     
 )
 from constructs import Construct
-from sprint4.pipeline_stage import MyStage
+from sprint4.pipeline_stage import TabraizStage2
 
 
 
 
-class MyPipelineStack(Stack):
+class TabraizPipelineStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -35,12 +35,12 @@ class MyPipelineStack(Stack):
         synth = pipeline_.ShellStep("CodeBuild",
         input= source,
         commands= ['cd Tabraiz/sprint4/', 'pip install -r requirements.txt','npm install -g aws-cdk','cdk synth'],
-        primary_output_directory= "Tabraiz/sprint3/cdk.out")
+        primary_output_directory= "Tabraiz/sprint4/cdk.out")
 
 
         #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.pipelines/CodePipeline.html
         #Creating a code pipeline to deploy cdk apps
-        myPipeline = pipeline_.CodePipeline(self, "TABPipeline",
+        myPipeline = pipeline_.CodePipeline(self, "TABPipeline2",
         synth= synth)
 
 
@@ -48,14 +48,14 @@ class MyPipelineStack(Stack):
 
         # Create and add beta stage to pipeline with a pre testing step (Pre-production beta Stage for validation)
         #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.pipelines/AddStageOpts.html
-        beta = MyStage(self, "TABBetaStage")
-        myPipeline.add_stage(beta, pre=[pipeline_.ShellStep("UnitTest",
+        beta = TabraizStage2(self, "TABBetaStage2")
+        myPipeline.add_stage(beta, pre=[pipeline_.ShellStep("UnitTest2",
         commands= ['cd Tabraiz/sprint4/', 'pip install -r requirements.txt','pip install -r requirements-dev.txt','npm install -g aws-cdk','cdk synth', 'pytest'],
         primary_output_directory= "Tabraiz/sprint4/cdk.out")
                 ])
 
         #Create  production stage
-        prod = MyStage(self, "TABProdStage")
+        prod = TabraizStage2(self, "TABProdStage2")
         #Add production stage to pipeline with a pre manual approval step
         #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.pipelines/ManualApprovalStep.html
         myPipeline.add_stage(prod, pre=[pipeline_.ManualApprovalStep("PromoteToProduction")])

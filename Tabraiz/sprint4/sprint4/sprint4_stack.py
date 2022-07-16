@@ -21,10 +21,11 @@ from aws_cdk import (
 )
 from constructs import Construct
 from resources import constants as constants
+from resources import getData as getData
 
 
 
-class Sprint4Stack(Stack):
+class TabraizSprint4Stack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -47,7 +48,24 @@ class Sprint4Stack(Stack):
 
 
         #create gateway
-        api_connect = self.create_api("request_lambda.lambda_handler")
+        #api_connect = self.create_api("request_lambda.lambda_handler")
+        api_connect = apigateway_.LambdaRestApi(self, "TabraizURLApi", 
+        handler= rq_lambda, 
+        proxy=False,
+        endpoint_configuration=apigateway_.EndpointConfiguration(
+            types=[apigateway_.EndpointType.REGIONAL] 
+            )
+        )
+
+        #Grant API Gateway permissions to invoke ApiLambda
+        #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda/Function.html?highlight=grant%20invoke#aws_cdk.aws_lambda.Function.grant_invoke
+        rq_lambda.grant_invoke(aws_iam.ServicePrincipal("apigateway.amazonaws.com"))
+
+
+        
+
+
+        
         #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_apigateway/LambdaRestApi.html
         item = api_connect.root.add_resource("item")
         item.add_method("GET") # GET /item
@@ -55,8 +73,8 @@ class Sprint4Stack(Stack):
         item.add_method("PATCH") # PATCH /item
         item.add_method("DELETE") # DELETE /item
 
-        items = api_connect.root.add_resource("items")
-        items.add_method("GET") # GET /items
+        #items = api_connect.root.add_resource("items")
+        #items.add_method("GET") # GET /items
 
 
 
@@ -166,6 +184,16 @@ class Sprint4Stack(Stack):
         db_lambda.add_environment("DBTable", dbName)
         #2nd table environment variable
         rq_lambda.add_environment("RqTable",dbName2)
+        #3rd environment
+        hw_lambda.add_environment("RqTable",dbName2)
+
+
+        # Grant permission to both lambda functions to read and write in url table
+        # https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_dynamodb/Table.html#aws_cdk.aws_dynamodb.Table.grant_read_write_data    
+        DBTable2.grant_read_write_data(db_lambda)
+        DBTable2.grant_read_write_data(hw_lambda)
+
+
 
 
 
@@ -197,7 +225,10 @@ class Sprint4Stack(Stack):
         #     visibility_timeout=Duration.seconds(300),
         # )
 
-        for i in constants.URL_TO_MONITOR:
+        #get url list from constants
+        Url_list = getData.get_url_list(DBTable2)
+
+        for i in Url_list:
             dimensions = {"URL": i}
             #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_cloudwatch/Metric.html
             #define threshold and create alarms
@@ -286,10 +317,24 @@ class Sprint4Stack(Stack):
     #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.aws_dynamodb/Attribute.html#aws_cdk.aws_dynamodb.Attribute
     def create_table2(self):
         return db_.Table(
-            self, id = "URLInfoTable",
+            self, id = "TabraizURLInfoTable",
             partition_key = db_.Attribute(name="URL_id", type=db_.AttributeType.STRING),
             removal_policy= RemovalPolicy.DESTROY,
         )    
     
+
+
+"""
+    #create lambda rest api
+    #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_apigateway/LambdaRestApi.html
     def create_api(self, handler):
-        return apigateway_.LambdaRestApi(self, "URLApi", handler= handler, proxy=False, )
+        return apigateway_.LambdaRestApi(self, "TabraizURLApi", 
+        handler= handler, 
+        proxy=False,
+        endpoint_configuration=apigateway_.EndpointConfiguration(
+            types=[apigateway_.EndpointType.REGIONAL] 
+            )
+        )
+
+
+ """       

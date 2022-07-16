@@ -73,7 +73,7 @@ def test_role_created(template):
 def test_table_created(template):
     #check if table is created 
     #https://docs.aws.amazon.com/cdk/api/v1/python/aws_cdk.assertions/Template.html
-    template.resource_count_is("AWS::DynamoDB::Table", 1)
+    template.resource_count_is("AWS::DynamoDB::Table", 2)
 
 def test_lambda_sub(template):
     #check if sns lambda subscription is created or not
@@ -88,10 +88,10 @@ def test_email_sub(template):
 
 
 
-def test_to_json(test_app):
+#def test_to_json(test_app):
     #Test that the CloudFormation template deserialized into an object.
     #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.assertions/Template.html#aws_cdk.assertions.Template.to_json
-    test_app.to_json()
+#    test_app.to_json()
 
 
 #Test for checking the api gateway count 
@@ -104,16 +104,16 @@ def test_resourceAPI(template):
      template.has_resource_properties("AWS::ApiGateway::Resource", {"PathPart": "item"})
 
 #test for checking delete api method
-def test_DeleteAPImethod(template):
-     template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "DELETE"})
+#def test_DeleteAPImethod(template):
+#     template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "DELETE"})
 
 #test for checking update api method
 def test_UpdateAPImethod(template):
     template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "POST"})
 
 #test for checking put api method
-def test_PUTAPImethod(template):
-    template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "PUT"})
+#def test_PUTAPImethod(template):
+#    template.has_resource_properties("AWS::ApiGateway::Method", { "HttpMethod": "PUT"})
 
 #test for checking get api method
 def test_UpdateAPImethod(template):

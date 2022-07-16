@@ -5,13 +5,16 @@ import http
 import urllib3
 from urllib import response
 
-from cloudWatch_putMetric import cloudWatch_putMetric
+from resources.cloudWatch_putMetric import cloudWatch_putMetric
 
-import constants as constants
-import getData as getData
+import resources.constants as constants
+#import getData as getData
 import boto3
 import json
 import os
+
+
+db_resource = boto3.resource('dynamodb', region_name= 'us-east-1')  
 
 
 
@@ -22,12 +25,19 @@ def lambda_handler(event, context):
     #i would like to publish my matrices to cloudwatch
     cw= cloudWatch_putMetric()
 
+    #db_table_name=os.environ["RqTable"]
     db_table_name=os.environ["RqTable"]
 
-    #get url list from constants
-    Url_list = getData.get_url_list(db_table_name)
-    
+    table = db_resource.Table(db_table_name)
+    result = table.scan()
+    response = result['items']
 
+    #store url from database into the list
+    for i in range(len(response)):
+        constants.URL_TO_MONITOR.append(response[i]["URL"])
+    
+    #get URL List
+    Url_list = constants.URL_TO_MONITOR
 
     
     for i in Url_list:
@@ -80,4 +90,6 @@ def getLatency(url):
      delta = end - start                        #take time difference
      latencySec = round(delta.microseconds * 0.000001,6)
      return latencySec
+
+
 

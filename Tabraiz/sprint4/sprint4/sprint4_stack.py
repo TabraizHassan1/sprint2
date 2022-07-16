@@ -1,4 +1,5 @@
 from cgitb import handler
+#import imp
 from multiprocessing import reduction
 from aws_cdk import (
     Duration,
@@ -21,7 +22,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 from resources import constants as constants
-from resources import getData as getData
+#from resources import hw_lambda as hw_lambda_ 
 
 
 
@@ -226,7 +227,7 @@ class TabraizSprint4Stack(Stack):
         # )
 
         #get url list from constants
-        Url_list = getData.get_url_list(DBTable2)
+        Url_list = constants.URL_TO_MONITOR
 
         for i in Url_list:
             dimensions = {"URL": i}

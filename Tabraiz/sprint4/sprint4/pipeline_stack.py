@@ -26,7 +26,7 @@ class TabraizPipelineStack(Stack):
         #https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/create-secret.html
         #Providing a GitHub Source as the codepipeline source (source stage)
         source = pipeline_.CodePipelineSource.git_hub("TabraizHassan1/sprint2","main",
-        authentication = SecretValue.secrets_manager('tokenNew2'), trigger = actions_.GitHubTrigger('POLL')
+        authentication = SecretValue.secrets_manager('token2'), trigger = actions_.GitHubTrigger('POLL')
         )
 
 

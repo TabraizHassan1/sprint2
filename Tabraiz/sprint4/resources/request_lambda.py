@@ -42,21 +42,21 @@ def lambda_handler(event, context):
     #logger.info(event)
 
     httpMethod = event['httpMethod']
-    path = event['path']
+    #path = event['path']
 
     
-    if(httpMethod== getMethod and path== urlpath):
+    if(httpMethod== getMethod):
         response = getItem()
    # elif(httpMethod== getMethod and path== itemspath):
    #     response = getItems()
-    elif(httpMethod== postMethod and path== urlpath):
+    elif(httpMethod== postMethod):
         response = saveItem(json.loads(event['body']))
         
-    elif(httpMethod== putMethod and path== urlpath):
+    elif(httpMethod== putMethod):
         reqstBody = json.loads(event['body'])
         response = modifyItem(reqstBody['URL_id'], reqstBody['URL_name'])
 
-    elif(httpMethod== deleteMethod and path== urlpath):
+    elif(httpMethod== deleteMethod):
         reqstBody = json.loads(event['body'])
         response = deleteItem(reqstBody['URL_id'])
 

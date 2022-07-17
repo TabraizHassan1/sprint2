@@ -111,7 +111,7 @@ def modifyItem(reqstBody):
     url_id= reqstBody['URL_id']
     url_name = reqstBody['URL_name']
     key1 = {
-        'URL_id' : url_id
+        'URL_id' : str(url_id)
     }
     response = table.update_item(
     key1,
@@ -130,11 +130,11 @@ def modifyItem(reqstBody):
 #delete url by id
 def deleteItem(reqstBody):
     url_id= reqstBody['URL_id']
-    key1 = {
-        'URL_id' : url_id
+    Key = {
+        'URL_id' : str(url_id)
     }
     response = table.delete_item(
-    key1 )
+    Key )
     if response:
         return buildResponse({"Message":"URL Deleted successfully!!!"})
     else:

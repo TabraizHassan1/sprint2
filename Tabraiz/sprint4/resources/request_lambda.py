@@ -53,12 +53,14 @@ def lambda_handler(event, context):
         response = saveItem(json.loads(event['body']))
         
     elif(httpMethod== putMethod):
-        reqstBody = json.loads(event['body'])
-        response = modifyItem(reqstBody['URL_id'],reqstBody['URL_name'])
+        #reqstBody = json.loads(event['body'])
+        #response = modifyItem(reqstBody['URL_id'],reqstBody['URL_name'])
+        response = modifyItem(json.loads(event['body']))
 
     elif(httpMethod== deleteMethod):
-        reqstBody = json.loads(event['body'])
-        response = deleteItem(reqstBody['URL_id'])
+        #reqstBody = json.loads(event['body'])
+        #response = deleteItem(reqstBody['URL_id'])
+        response = deleteItem(json.loads(event['body']))
 
     else:
         return{
@@ -90,13 +92,13 @@ def getItem():
 def saveItem(rqstbody):
     url_id= rqstbody['URL_id']
     url_name = rqstbody['URL_name']
-    Key ={
+    key ={
         'URL_id' : url_id,
         'URL_name': url_name
 
 
     }
-    response=table.put_item(Item = Key)
+    response=table.put_item(Item = key)
     if response:
         return buildResponse({"Message":"URL Added successfully!!!"})
     else:
@@ -105,14 +107,18 @@ def saveItem(rqstbody):
 
 
 #update url by id 
-def modifyItem(url_id, url_name):
-    key = {
+def modifyItem(reqstBody):
+    url_id= reqstBody['URL_id']
+    url_name = reqstBody['URL_name']
+    key1 = {
         'URL_id' : url_id
     }
     response = table.update_item(
-    Item = key,
+    key1,
     UpdateExpression = 'SET url_name = :URL_name',
-    ExpressionAttributeValues={'URL_name': url_name } 
+    ExpressionAttributeValues={'URL_name': url_name },
+   # ExpressionAttributeNames = {"url_name": "url_name"}
+
     )
     if response:
         return buildResponse({"Message":"URL Updated successfully!!!"})
@@ -122,12 +128,13 @@ def modifyItem(url_id, url_name):
 
 
 #delete url by id
-def deleteItem(url_id):
-    key = {
+def deleteItem(reqstBody):
+    url_id= reqstBody['URL_id']
+    key1 = {
         'URL_id' : url_id
     }
     response = table.delete_item(
-    key )
+    key1 )
     if response:
         return buildResponse({"Message":"URL Deleted successfully!!!"})
     else:

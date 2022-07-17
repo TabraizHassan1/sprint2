@@ -77,7 +77,7 @@ def lambda_handler(event, context):
 #GET/Read url from database
 def getItem():
     result = table.scan()
-    response = result['items']
+    response = result['Item']
     if response:
         return buildResponse(response)
     else:
@@ -97,7 +97,7 @@ def saveItem(rqstbody):
 
 
     }
-    response=table.put_item(item = Key)
+    response=table.put_item(Item = Key)
     if response:
         return buildResponse({"Message":"URL Added successfully!!!"})
     else:
@@ -111,7 +111,7 @@ def modifyItem(url_id, url_name):
         'URL_id' : url_id
     }
     response = table.update_item(
-    item= Key,
+    Item= Key,
     UpdateExpression = 'SET url_name = :URL_name',
     ExpressionAttributeValues={'URL_name': url_name } 
     )
@@ -128,7 +128,7 @@ def deleteItem(url_id):
     'URL_id' : url_id
     }
     response = table.update_item(
-    item= Key)
+    Item= Key)
     if response:
         return buildResponse({"Message":"URL Deleted successfully!!!"})
     else:

@@ -118,8 +118,8 @@ def modifyItem(reqstBody):
     Key = {
         'URL_id' : str(url_id)
     },
-    UpdateExpression = 'SET #url_name = :URL_name',
-    ExpressionAttributeValues={':URL_name': url_name },
+    UpdateExpression = 'SET #url_name = :url_name',
+    ExpressionAttributeValues={':url_name': url_name },
     ExpressionAttributeNames = {"#url_name": "url_name"}
 
     )

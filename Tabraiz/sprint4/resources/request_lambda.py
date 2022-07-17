@@ -1,11 +1,12 @@
-from asyncio.log import logger
-from email import message
-import re
+#from asyncio.log import logger
+#from email import message
+#import re
 #from msilib import Table
-from urllib import response
+#from urllib import response
 import boto3
 import json
 import os
+from boto3.dynamodb.conditions import Key
 #import logging
 
 
@@ -93,7 +94,7 @@ def saveItem(rqstbody):
     url_id= rqstbody['URL_id']
     url_name = rqstbody['URL_name']
     key ={
-        'URL_id' : url_id,
+        'URL_id' : str(url_id),
         'URL_name': url_name
 
 
@@ -110,14 +111,16 @@ def saveItem(rqstbody):
 def modifyItem(reqstBody):
     url_id= reqstBody['URL_id']
     url_name = reqstBody['URL_name']
-    key1 = {
-        'URL_id' : str(url_id)
-    }
+   # Key = {
+   #     'URL_id' : str(url_id)
+   # }
     response = table.update_item(
-    key1,
-    UpdateExpression = 'SET url_name = :URL_name',
-    ExpressionAttributeValues={'URL_name': url_name },
-   # ExpressionAttributeNames = {"url_name": "url_name"}
+    Key = {
+        'URL_id' : str(url_id)
+    },
+    UpdateExpression = 'SET #url_name = :URL_name',
+    ExpressionAttributeValues={':URL_name': url_name },
+    ExpressionAttributeNames = {"#url_name": "url_name"}
 
     )
     if response:
@@ -130,11 +133,12 @@ def modifyItem(reqstBody):
 #delete url by id
 def deleteItem(reqstBody):
     url_id= reqstBody['URL_id']
-    Key = {
+    #Key = 
+    response = table.delete_item( 
+        Key = {
         'URL_id' : str(url_id)
-    }
-    response = table.delete_item(
-    Key )
+        } )
+    #Key )
     if response:
         return buildResponse({"Message":"URL Deleted successfully!!!"})
     else:

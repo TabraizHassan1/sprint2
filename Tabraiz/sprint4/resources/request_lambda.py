@@ -54,7 +54,7 @@ def lambda_handler(event, context):
         
     elif(httpMethod== putMethod):
         reqstBody = json.loads(event['body'])
-        response = modifyItem(reqstBody['URL_id'], reqstBody['URL_name'])
+        response = modifyItem(reqstBody['URL_id'],reqstBody['URL_name'])
 
     elif(httpMethod== deleteMethod):
         reqstBody = json.loads(event['body'])
@@ -76,8 +76,7 @@ def lambda_handler(event, context):
 
 #GET/Read url from database
 def getItem():
-    result = table.scan()
-    response = result['Item']
+    response = table.scan()['Items']
     if response:
         return buildResponse(response)
     else:
@@ -111,7 +110,7 @@ def modifyItem(url_id, url_name):
         'URL_id' : url_id
     }
     response = table.update_item(
-    Item= Key,
+    Item = Key,
     UpdateExpression = 'SET url_name = :URL_name',
     ExpressionAttributeValues={'URL_name': url_name } 
     )
@@ -127,8 +126,8 @@ def deleteItem(url_id):
     Key = {
     'URL_id' : url_id
     }
-    response = table.update_item(
-    Item= Key)
+    response = table.delete_item(
+    Item = Key)
     if response:
         return buildResponse({"Message":"URL Deleted successfully!!!"})
     else:

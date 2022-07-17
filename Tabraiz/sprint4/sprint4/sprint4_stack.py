@@ -71,7 +71,7 @@ class TabraizSprint4Stack(Stack):
         item = api_connect.root.add_resource("item")
         item.add_method("GET") # GET /item
         item.add_method("POST") # POST /item
-        item.add_method("PATCH") # PATCH /item
+        item.add_method("PUT") # PUT /item
         item.add_method("DELETE") # DELETE /item
 
         #items = api_connect.root.add_resource("items")

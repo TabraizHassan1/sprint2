@@ -106,11 +106,11 @@ def saveItem(rqstbody):
 
 #update url by id 
 def modifyItem(url_id, url_name):
-    Key = {
+    key = {
         'URL_id' : url_id
     }
     response = table.update_item(
-    Item = Key,
+    Item = key,
     UpdateExpression = 'SET url_name = :URL_name',
     ExpressionAttributeValues={'URL_name': url_name } 
     )
@@ -123,11 +123,11 @@ def modifyItem(url_id, url_name):
 
 #delete url by id
 def deleteItem(url_id):
-    Key = {
-    'URL_id' : url_id
+    key = {
+        'URL_id' : url_id
     }
     response = table.delete_item(
-    Item = Key)
+    key )
     if response:
         return buildResponse({"Message":"URL Deleted successfully!!!"})
     else:

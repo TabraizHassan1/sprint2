@@ -20,7 +20,9 @@ db_resource = boto3.resource('dynamodb', region_name= 'us-east-1')
 db_table_name=os.environ["RqTable"]
 table = db_resource.Table(db_table_name)
 
-
+#itemspath = '/items'
+#logger = logging.getLogger()
+#logger.setLevel(logging.INFO)
 
 
 getMethod = 'GET'
@@ -28,24 +30,12 @@ postMethod = 'POST'
 deleteMethod = 'DELETE'
 putMethod = 'PUT'
 urlpath = '/item' 
-#itemspath = '/items'
-
-#logger = logging.getLogger()
-#logger.setLevel(logging.INFO)
-
-
 #all alarm information is in the event
 def lambda_handler(event, context):
     #region = os.environ['AWS_REGION']
-    
-
-
     #logger.info(event)
-
     httpMethod = event['httpMethod']
     #path = event['path']
-
-    
     if(httpMethod== getMethod):
         response = getItem()
    # elif(httpMethod== getMethod and path== itemspath):
@@ -92,10 +82,10 @@ def getItem():
 #Save url in database
 def saveItem(rqstbody):
     url_id= rqstbody['URL_id']
-    url_name = rqstbody['URL_name']
+    url_name = rqstbody['url_name']
     key ={
         'URL_id' : str(url_id),
-        'URL_name': url_name
+        'url_name': url_name
 
 
     }
@@ -110,7 +100,7 @@ def saveItem(rqstbody):
 #update url by id 
 def modifyItem(reqstBody):
     url_id= reqstBody['URL_id']
-    url_name = reqstBody['URL_name']
+    url_name = reqstBody['url_name']
    # Key = {
    #     'URL_id' : str(url_id)
    # }

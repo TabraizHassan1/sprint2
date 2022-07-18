@@ -58,7 +58,7 @@ class TabraizSprint4Stack(Stack):
             )
         )
 
-        #Grant API Gateway permissions to invoke ApiLambda
+        #Grant API Gateway permissions to invoke request_lambda
         #https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_lambda/Function.html?highlight=grant%20invoke#aws_cdk.aws_lambda.Function.grant_invoke
         rq_lambda.grant_invoke(aws_iam.ServicePrincipal("apigateway.amazonaws.com"))
 
